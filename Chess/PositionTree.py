@@ -15,7 +15,7 @@ class Tree():
     def newNote(self, node, movelog, i, comment):
         if i == len(movelog):
             node.comment = comment
-        if movelog[i].moveID in node.children.keys():
+        elif movelog[i].moveID in node.children.keys():
             self.newNote(node.children[movelog[i].moveID], movelog, i+1, comment)
         else:
             newNode = Node()

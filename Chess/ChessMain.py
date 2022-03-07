@@ -1,4 +1,6 @@
 import pygame as p
+from tkinter import *
+import PositionTree
 import pickle
 from Chess import ChessEngine
 WIDTH = 1024
@@ -7,7 +9,7 @@ DIMENSION = 8
 SQ_SIZE = HEIGHT//DIMENSION
 MAX_FPS = 15
 IMAGES = {}
-
+root = PositionTree.Tree()
 
 
 def loadImages():
@@ -28,6 +30,7 @@ def main():
     buttons = []
     buttons.append(ChessEngine.Button(len(buttons), "back"))
     buttons.append(ChessEngine.Button(len(buttons), "reset"))
+    buttons.append(ChessEngine.Button(len(buttons), "comment"))
     validMoves = gs.getValidMoves()
     print(gs.board)
     loadImages()
@@ -79,8 +82,16 @@ def main():
                             moveMade = False
                             animate = False
                             gameOver = False
+                        if row==2:
 
-
+                            root = Tk()
+                            text = Text(width=50, height=10)
+                            text.pack()
+                            frame = Frame()
+                            frame.pack()
+                            Button(frame, text="Comment",
+                                   command=lambda: makeComment(text, gs)).pack(side=LEFT)
+                            root.mainloop()
 
 
 
@@ -176,6 +187,11 @@ def drawText(screen, text):
     textObject = font.render(text, 0, p.Color("Black"))
     textLocation = p.Rect(0, 0, WIDTH//2, HEIGHT).move(WIDTH//4-textObject.get_width()//2, HEIGHT//2-textObject.get_height()//2)
     screen.blit(textObject, textLocation)
+def makeComment(text, gs):
+    print(text.get(1.0, END))
+    root.newNote(root.root, gs.moveLog, 0, text.get(1.0, END))
+    print("here")
+    print(root.root.comment)
 
 
 
