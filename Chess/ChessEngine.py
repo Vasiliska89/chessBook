@@ -23,7 +23,26 @@ class GameState():
         self.currentCastlingRights = CastleRights(True, True, True, True)
         self.castleRightsLog = [CastleRights(self.currentCastlingRights.wks, self.currentCastlingRights.bks,
                                              self.currentCastlingRights.wqs, self.currentCastlingRights.bqs)]
-
+    def getFen(self):
+        fen = ""
+        for i in range(len(self.board)):
+            for j in range(len(self.board[1])):
+                fen+= self.board[i][j]
+        fen+="w" if self.whiteToMove else "b"
+        if self.currentCastlingRights.wks:
+            fen+="wks"
+        if self.currentCastlingRights.wqs:
+            fen+="wqs"
+        if self.currentCastlingRights.bks:
+            fen+="bks"
+        if self.currentCastlingRights.bqs:
+            fen+="bqs"
+        if len(self.enpassantPossible)==0:
+            fen+="-"
+        else:
+            r, c = self.enpassantPossible
+            fen+=str(r)+str(c)
+        return fen
     def makeMove(self, move):
         self.board[move.startRow][move.startCol] = "--"
         self.board[move.endRow][move.endCol] = move.pieceMoved

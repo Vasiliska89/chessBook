@@ -1,7 +1,6 @@
 import pygame as p
 from tkinter import *
-import PositionTree
-import pickle
+
 from Chess import ChessEngine
 WIDTH = 1024
 HEIGHT = 512
@@ -9,7 +8,8 @@ DIMENSION = 8
 SQ_SIZE = HEIGHT//DIMENSION
 MAX_FPS = 15
 IMAGES = {}
-root = PositionTree.Tree()
+import sqlite3 as sq
+
 
 
 def loadImages():
@@ -31,6 +31,7 @@ def main():
     buttons.append(ChessEngine.Button(len(buttons), "back"))
     buttons.append(ChessEngine.Button(len(buttons), "reset"))
     buttons.append(ChessEngine.Button(len(buttons), "comment"))
+    buttons.append(ChessEngine.Button(len(buttons), "show"))
     validMoves = gs.getValidMoves()
     print(gs.board)
     loadImages()
@@ -82,7 +83,7 @@ def main():
                             moveMade = False
                             animate = False
                             gameOver = False
-                        if row==2:
+                        if row==2: #make comment
 
                             root = Tk()
                             text = Text(width=50, height=10)
@@ -92,6 +93,14 @@ def main():
                             Button(frame, text="Comment",
                                    command=lambda: makeComment(text, gs)).pack(side=LEFT)
                             root.mainloop()
+                        if row==3: #show comment
+                            with sq.connect("chessNote.db") as con:  # this will be created if not exist
+                                cur = con.cursor()
+                                fen = getChar(gs.getFen())
+                                cur.execute("""CREATE TABLE IF NOT EXISTS notes (fen TEXT, comment TEXT NOT NULL DEFAULT 'No comment yet')""")
+                                cur.execute("""SELECT comment FROM notes WHERE fen=?""", (fen,))
+
+                                showComment(cur.fetchall()[0][0] if len(cur.fetchall()) else "This position is not explored by you!")
 
 
 
@@ -114,6 +123,8 @@ def main():
 
         clock.tick(MAX_FPS)
         p.display.flip()
+
+
 
 '''
 highliting moves
@@ -189,11 +200,25 @@ def drawText(screen, text):
     screen.blit(textObject, textLocation)
 def makeComment(text, gs):
     print(text.get(1.0, END))
-    root.newNote(root.root, gs.moveLog, 0, text.get(1.0, END))
-    print("here")
-    print(root.root.comment)
+    with sq.connect("chessNote.db") as con:  # this will be created if not exist
+        cur = con.cursor()
+        fen = getChar(gs.getFen())
+        cur.execute("""CREATE TABLE IF NOT EXISTS notes (fen TEXT, comment TEXT NOT NULL DEFAULT 'No comment yet')""")
+        cur.execute("""SELECT comment FROM notes WHERE fen=?""", (fen,))
+        if len(cur.fetchall())==0:
+            cur.execute("""INSERT INTO notes VALUES(?, ?)""", (fen, text.get(1.0, END)))
+        else:
+            cur.execute("""UPDATE notes SET comment = ? WHERE fen = ?""", (text.get(1.0, END), fen))
+def showComment(txt):
+    label = Label(None, text=txt, font=('Times', '18'))
+    label.pack()
+    label.mainloop()
 
-
+def getChar(string):
+    char = ''
+    for i in string:
+        char += i
+    return char
 
 main()
 
