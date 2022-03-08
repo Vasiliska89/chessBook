@@ -4,4 +4,6 @@ Here i am going to implement interactive Chess NoteBook, which can be useful for
 
 Simple engine evaluation of the position is in plan
 
+СhessMain is the file to execute
+
 Inspyred by https://www.youtube.com/watch?v=EnYui0e73Rs&list=PLBwF487qi8MGU81nDGaeNE1EnNEPYWKY_
