@@ -1,6 +1,6 @@
 # chessBook
 
-Here i am going to implement interactive Chess NoteBook, which can be useful for those who are going to memorise or create their own opening base system to improve their chess skill.
+Here i am going to implement interactive Chess NoteBook, which can be useful for those who are going to memorise or create their own opening base system to improve their chess skill. The program created mainly for tablets on Windows, which is what i have, but fits for any laptop on Windows with mouse to control
 
 Simple engine evaluation of the position is in plan
 
