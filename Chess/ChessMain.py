@@ -1,6 +1,6 @@
 import pygame as p
+import sqlite3 as sq
 from tkinter import *
-
 from Chess import ChessEngine
 WIDTH = 1024
 HEIGHT = 512
@@ -8,7 +8,7 @@ DIMENSION = 8
 SQ_SIZE = HEIGHT//DIMENSION
 MAX_FPS = 15
 IMAGES = {}
-import sqlite3 as sq
+
 
 
 
