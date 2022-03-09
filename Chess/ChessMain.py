@@ -99,8 +99,8 @@ def main():
                                 fen = getChar(gs.getFen())
                                 cur.execute("""CREATE TABLE IF NOT EXISTS notes (fen TEXT, comment TEXT NOT NULL DEFAULT 'No comment yet')""")
                                 cur.execute("""SELECT comment FROM notes WHERE fen=?""", (fen,))
-
-                                showComment(cur.fetchall()[0][0] if len(cur.fetchall()) else "This position is not explored by you!")
+                                com = cur.fetchall()
+                                showComment(com[0][0] if len(com)>0 else "This position is not explored by you!")
 
 
 
