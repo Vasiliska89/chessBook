@@ -11,7 +11,9 @@ IMAGES = {}
 
 
 
-
+'''
+figures images
+'''
 def loadImages():
     pieces = ["bR", "bN", "bB", "bQ", "bK", "wR", "wN", "wB", "wQ", "wK", "bp", "wp"]
     for piece in pieces:
