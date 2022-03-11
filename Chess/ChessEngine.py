@@ -225,165 +225,52 @@ class GameState():
                 elif (r+1, c+1) == self.enpassantPossible:
                     moves.append(Move((r, c), (r + 1, c + 1), self.board, isEnpassantMove=True))
 
-    def getRookMoves(self, row, col, moves):
-        r = row
-        c = col
-        if self.whiteToMove:
-            while r > 0 and self.board[r - 1][c] == "--":
-                moves.append(Move((row, col), (r - 1, c), self.board))
-                r -= 1
-            if r > 0 and self.board[r - 1][c][0] == 'b':
-                moves.append(Move((row, col), (r - 1, c), self.board))
-            r = row
-            c = col
-            while r < 7 and self.board[r + 1][c] == "--":
-                moves.append(Move((row, col), (r + 1, c), self.board))
-                r += 1
-            if r < 7 and self.board[r + 1][c][0] == 'b':
-                moves.append(Move((row, col), (r + 1, c), self.board))
-            r = row
-            c = col
-            while c < 7 and self.board[r][c + 1] == "--":
-                moves.append(Move((row, col), (r, c + 1), self.board))
-                c += 1
-            if c < 7 and self.board[r][c + 1][0] == 'b':
-                moves.append(Move((row, col), (r, c + 1), self.board))
-            r = row
-            c = col
-            while c > 0 and self.board[r][c - 1] == "--":
-                moves.append(Move((row, col), (r, c - 1), self.board))
-                c -= 1
-            if c > 0 and self.board[r][c - 1][0] == 'b':
-                moves.append(Move((row, col), (r, c - 1), self.board))
-        else:
-            while r > 0 and self.board[r - 1][c] == "--":
-                moves.append(Move((row, col), (r - 1, c), self.board))
-                r -= 1
-            if r > 0 and self.board[r - 1][c][0] == 'w':
-                moves.append(Move((row, col), (r - 1, c), self.board))
-            r = row
-            c = col
-            while r < 7 and self.board[r + 1][c] == "--":
-                moves.append(Move((row, col), (r + 1, c), self.board))
-                r += 1
-            if r < 7 and self.board[r + 1][c][0] == 'w':
-                moves.append(Move((row, col), (r + 1, c), self.board))
-            r = row
-            c = col
-            while c < 7 and self.board[r][c + 1] == "--":
-                moves.append(Move((row, col), (r, c + 1), self.board))
-                c += 1
-            if c < 7 and self.board[r][c + 1][0] == 'w':
-                moves.append(Move((row, col), (r, c + 1), self.board))
-            r = row
-            c = col
-            while c > 0 and self.board[r][c - 1] == "--":
-                moves.append(Move((row, col), (r, c - 1), self.board))
-                c -= 1
-            if c > 0 and self.board[r][c - 1][0] == 'w':
-                moves.append(Move((row, col), (r, c - 1), self.board))
+    def getRookMoves(self, r, c, moves):
+        rookMoves = ((0, 1), (1, 0), (-1, 0), (0, -1))
+        allyColor = "w" if self.whiteToMove else "b"
+        for i in range(len(rookMoves)):
+            j = 1
+            pathIsFree = True
+            while (pathIsFree):
+                endRow = r + j * rookMoves[i][0]
+                endCol = c + j * rookMoves[i][1]
+                if 0 <= endRow < 8 and 0 <= endCol < 8:
+                    endPiece = self.board[endRow][endCol]
+                    if endPiece[0] != allyColor:
+                        moves.append(Move((r, c), (endRow, endCol), self.board))
+                    else:
+                        pathIsFree = False
+                else:
+                    pathIsFree = False
+                j+=1
 
     def getKnightMoves(self, r, c, moves):
-        if self.whiteToMove:
-            if r > 0 and c > 1 and (self.board[r - 1][c - 2] == "--" or self.board[r - 1][c - 2][0] == 'b'):
-                moves.append(Move((r, c), (r - 1, c - 2), self.board))
-            if r > 1 and c > 0 and (self.board[r - 2][c - 1] == "--" or self.board[r - 2][c - 1][0] == 'b'):
-                moves.append(Move((r, c), (r - 2, c - 1), self.board))
-            if r > 1 and c < 7 and (self.board[r - 2][c + 1] == "--" or self.board[r - 2][c + 1][0] == 'b'):
-                moves.append(Move((r, c), (r - 2, c + 1), self.board))
-            if r > 0 and c < 6 and (self.board[r - 1][c + 2] == "--" or self.board[r - 1][c + 2][0] == 'b'):
-                moves.append(Move((r, c), (r - 1, c + 2), self.board))
-            if r < 7 and c < 6 and (self.board[r + 1][c + 2] == "--" or self.board[r + 1][c + 2][0] == 'b'):
-                moves.append(Move((r, c), (r + 1, c + 2), self.board))
-            if r < 6 and c < 7 and (self.board[r + 2][c + 1] == "--" or self.board[r + 2][c + 1][0] == 'b'):
-                moves.append(Move((r, c), (r + 2, c + 1), self.board))
-            if r < 6 and c > 0 and (self.board[r + 2][c - 1] == "--" or self.board[r + 2][c - 1][0] == 'b'):
-                moves.append(Move((r, c), (r + 2, c - 1), self.board))
-            if r < 7 and c > 1 and (self.board[r + 1][c - 2] == "--" or self.board[r + 1][c - 2][0] == 'b'):
-                moves.append(Move((r, c), (r + 1, c - 2), self.board))
-        else:
-            if r > 0 and c > 1 and (self.board[r - 1][c - 2] == "--" or self.board[r - 1][c - 2][0] == 'w'):
-                moves.append(Move((r, c), (r - 1, c - 2), self.board))
-            if r > 1 and c > 0 and (self.board[r - 2][c - 1] == "--" or self.board[r - 2][c - 1][0] == 'w'):
-                moves.append(Move((r, c), (r - 2, c - 1), self.board))
-            if r > 1 and c < 7 and (self.board[r - 2][c + 1] == "--" or self.board[r - 2][c + 1][0] == 'w'):
-                moves.append(Move((r, c), (r - 2, c + 1), self.board))
-            if r > 0 and c < 6 and (self.board[r - 1][c + 2] == "--" or self.board[r - 1][c + 2][0] == 'w'):
-                moves.append(Move((r, c), (r - 1, c + 2), self.board))
-            if r < 7 and c < 6 and (self.board[r + 1][c + 2] == "--" or self.board[r + 1][c + 2][0] == 'w'):
-                moves.append(Move((r, c), (r + 1, c + 2), self.board))
-            if r < 6 and c < 7 and (self.board[r + 2][c + 1] == "--" or self.board[r + 2][c + 1][0] == 'w'):
-                moves.append(Move((r, c), (r + 2, c + 1), self.board))
-            if r < 6 and c > 0 and (self.board[r + 2][c - 1] == "--" or self.board[r + 2][c - 1][0] == 'w'):
-                moves.append(Move((r, c), (r + 2, c - 1), self.board))
-            if r < 7 and c > 1 and (self.board[r + 1][c - 2] == "--" or self.board[r + 1][c - 2][0] == 'w'):
-                moves.append(Move((r, c), (r + 1, c - 2), self.board))
+        knightMoves = ((-1, 2), (1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1))
+        allyColor = "w" if self.whiteToMove else "b"
+        for i in range(len(knightMoves)):
+            endRow = r + knightMoves[i][0]
+            endCol = c + knightMoves[i][1]
+            if 0 <= endRow < 8 and 0 <= endCol < 8:
+                endPiece = self.board[endRow][endCol]
+                if endPiece[0] != allyColor:
+                    moves.append(Move((r, c), (endRow, endCol), self.board))
 
-    def getBishopMoves(self, row, col, moves):
-        r = row
-        c = col
-        if self.whiteToMove:
-            while r > 0 and c > 0 and self.board[r - 1][c - 1] == "--":
-                moves.append(Move((row, col), (r - 1, c - 1), self.board))
-                r -= 1
-                c -= 1
-            if r > 0 and c > 0 and self.board[r - 1][c - 1][0] == 'b':
-                moves.append(Move((row, col), (r - 1, c - 1), self.board))
-            r = row
-            c = col
-            while r < 7 and c > 0 and self.board[r + 1][c - 1] == "--":
-                moves.append(Move((row, col), (r + 1, c - 1), self.board))
-                r += 1
-                c -= 1
-            if r < 7 and c > 0 and self.board[r + 1][c - 1][0] == 'b':
-                moves.append(Move((row, col), (r + 1, c - 1), self.board))
-            r = row
-            c = col
-            while r > 0 and c < 7 and self.board[r - 1][c + 1] == "--":
-                moves.append(Move((row, col), (r - 1, c + 1), self.board))
-                r -= 1
-                c += 1
-            if r > 0 and c < 7 and self.board[r - 1][c + 1][0] == 'b':
-                moves.append(Move((row, col), (r - 1, c + 1), self.board))
-            r = row
-            c = col
-            while r < 7 and c < 7 and self.board[r + 1][c + 1] == "--":
-                moves.append(Move((row, col), (r + 1, c + 1), self.board))
-                c += 1
-                r += 1
-            if r < 7 and c < 7 and self.board[r + 1][c + 1][0] == 'b':
-                moves.append(Move((row, col), (r + 1, c + 1), self.board))
-        else:
-            while r > 0 and c > 0 and self.board[r - 1][c - 1] == "--":
-                moves.append(Move((row, col), (r - 1, c - 1), self.board))
-                r -= 1
-                c -= 1
-            if r > 0 and c > 0 and self.board[r - 1][c - 1][0] == 'w':
-                moves.append(Move((row, col), (r - 1, c - 1), self.board))
-            r = row
-            c = col
-            while r < 7 and c > 0 and self.board[r + 1][c - 1] == "--":
-                moves.append(Move((row, col), (r + 1, c - 1), self.board))
-                r += 1
-                c -= 1
-            if r < 7 and c > 0 and self.board[r + 1][c - 1][0] == 'w':
-                moves.append(Move((row, col), (r + 1, c - 1), self.board))
-            r = row
-            c = col
-            while r > 0 and c < 7 and self.board[r - 1][c + 1] == "--":
-                moves.append(Move((row, col), (r - 1, c + 1), self.board))
-                r -= 1
-                c += 1
-            if r > 0 and c < 7 and self.board[r - 1][c + 1][0] == 'w':
-                moves.append(Move((row, col), (r - 1, c + 1), self.board))
-            r = row
-            c = col
-            while r < 7 and c < 7 and self.board[r + 1][c + 1] == "--":
-                moves.append(Move((row, col), (r + 1, c + 1), self.board))
-                c += 1
-                r += 1
-            if r < 7 and c < 7 and self.board[r + 1][c + 1][0] == 'w':
-                moves.append(Move((row, col), (r + 1, c + 1), self.board))
+    def getBishopMoves(self, r, c, moves):
+        bishopMoves = ((-1, -1), (1, 1), (1, -1), (-1, 1))
+        allyColor = "w" if self.whiteToMove else "b"
+        for i in range(len(bishopMoves)):
+            j = 1
+            pathIsFree = True
+            while(pathIsFree):
+                endRow = r + j*bishopMoves[i][0]
+                endCol = c + j*bishopMoves[i][1]
+                if 0 <= endRow < 8 and 0 <= endCol < 8:
+                    endPiece = self.board[endRow][endCol]
+                    if endPiece[0] != allyColor:
+                        moves.append(Move((r, c), (endRow, endCol), self.board))
+                    else: pathIsFree = False
+                else: pathIsFree = False
+                j+=1
 
     def getQueenMoves(self, r, c, moves):
         self.getRookMoves(r, c, moves)
