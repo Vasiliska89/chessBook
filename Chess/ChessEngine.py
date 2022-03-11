@@ -10,8 +10,9 @@ class GameState():
             ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
         ]
-        self.moveFunctions = {'p': self.getPawnMoves, 'R': self.getRookMoves, 'N': self.getKnightMoves,
-                              'B': self.getBishopMoves, 'Q': self.getQueenMoves, 'K': self.getKingMoves}
+        self.moveFunctions = {'R': (((1, 0), (0, 1), (-1, 0), (0, -1)), True), 'N': (((1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1),(-2, 1), (-1, 2) ), False),
+                              'B': (((1, 1), (-1, 1), (1, -1), (-1, -1)), True), 'Q': (((1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)), True),
+                              'K': (((1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)), False)}
 
         self.whiteToMove = True
         self.moveLog = []
@@ -190,7 +191,10 @@ class GameState():
                 turn = self.board[r][c][0]  # color
                 if (turn == 'w' and self.whiteToMove) or (turn == 'b' and not self.whiteToMove):
                     piece = self.board[r][c][1]
-                    self.moveFunctions[piece](r, c, moves)
+                    if piece == 'p':
+                        self.getPawnMoves(r, c, moves)
+                    else:
+                        self.getPieceMoves(r, c, moves, self.moveFunctions[piece])
         return moves
 
     def getPawnMoves(self, r, c, moves):
@@ -225,67 +229,28 @@ class GameState():
                 elif (r+1, c+1) == self.enpassantPossible:
                     moves.append(Move((r, c), (r + 1, c + 1), self.board, isEnpassantMove=True))
 
-    def getRookMoves(self, r, c, moves):
-        rookMoves = ((0, 1), (1, 0), (-1, 0), (0, -1))
+    def getPieceMoves(self, r, c, moves, piece):
+        pieceMoves = piece[0]
         allyColor = "w" if self.whiteToMove else "b"
-        for i in range(len(rookMoves)):
+        for i in range(len(pieceMoves)):
             j = 1
             pathIsFree = True
+
             while (pathIsFree):
-                endRow = r + j * rookMoves[i][0]
-                endCol = c + j * rookMoves[i][1]
+                endRow = r + j * pieceMoves[i][0]
+                endCol = c + j * pieceMoves[i][1]
                 if 0 <= endRow < 8 and 0 <= endCol < 8:
                     endPiece = self.board[endRow][endCol]
                     if endPiece[0] != allyColor:
                         moves.append(Move((r, c), (endRow, endCol), self.board))
                     else:
                         pathIsFree = False
+                    if endPiece[0] !='-':
+                        pathIsFree = False
                 else:
                     pathIsFree = False
                 j+=1
-
-    def getKnightMoves(self, r, c, moves):
-        knightMoves = ((-1, 2), (1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1))
-        allyColor = "w" if self.whiteToMove else "b"
-        for i in range(len(knightMoves)):
-            endRow = r + knightMoves[i][0]
-            endCol = c + knightMoves[i][1]
-            if 0 <= endRow < 8 and 0 <= endCol < 8:
-                endPiece = self.board[endRow][endCol]
-                if endPiece[0] != allyColor:
-                    moves.append(Move((r, c), (endRow, endCol), self.board))
-
-    def getBishopMoves(self, r, c, moves):
-        bishopMoves = ((-1, -1), (1, 1), (1, -1), (-1, 1))
-        allyColor = "w" if self.whiteToMove else "b"
-        for i in range(len(bishopMoves)):
-            j = 1
-            pathIsFree = True
-            while(pathIsFree):
-                endRow = r + j*bishopMoves[i][0]
-                endCol = c + j*bishopMoves[i][1]
-                if 0 <= endRow < 8 and 0 <= endCol < 8:
-                    endPiece = self.board[endRow][endCol]
-                    if endPiece[0] != allyColor:
-                        moves.append(Move((r, c), (endRow, endCol), self.board))
-                    else: pathIsFree = False
-                else: pathIsFree = False
-                j+=1
-
-    def getQueenMoves(self, r, c, moves):
-        self.getRookMoves(r, c, moves)
-        self.getBishopMoves(r, c, moves)
-
-    def getKingMoves(self, r, c, moves):
-        kingMoves = ((-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1))
-        allyColor = "w" if self.whiteToMove else "b"
-        for i in range(8):
-            endRow = r+kingMoves[i][0]
-            endCol = c+kingMoves[i][1]
-            if 0<=endRow<8 and 0<=endCol<8:
-                endPiece = self.board[endRow][endCol]
-                if endPiece[0] != allyColor:
-                    moves.append(Move((r, c), (endRow, endCol), self.board))
+                pathIsFree = pathIsFree and piece[1]
 
     '''
     generate all valid castling moves for the king
