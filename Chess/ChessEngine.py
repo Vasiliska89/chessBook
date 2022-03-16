@@ -230,15 +230,15 @@ class GameState():
                     moves.append(Move((r, c), (r + 1, c + 1), self.board, isEnpassantMove=True))
 
     def getPieceMoves(self, r, c, moves, piece):
-        pieceMoves = piece[0]
+        directions, longMover = piece
         allyColor = "w" if self.whiteToMove else "b"
-        for i in range(len(pieceMoves)):
-            j = 1
+        for direction in directions:
+            steps = 1
             pathIsFree = True
 
             while (pathIsFree):
-                endRow = r + j * pieceMoves[i][0]
-                endCol = c + j * pieceMoves[i][1]
+                endRow = r + steps * direction[0]
+                endCol = c + steps * direction[1]
                 if 0 <= endRow < 8 and 0 <= endCol < 8:
                     endPiece = self.board[endRow][endCol]
                     if endPiece[0] != allyColor:
@@ -249,8 +249,8 @@ class GameState():
                         pathIsFree = False
                 else:
                     pathIsFree = False
-                j+=1
-                pathIsFree = pathIsFree and piece[1]
+                steps+=1
+                pathIsFree = pathIsFree and longMover
 
     '''
     generate all valid castling moves for the king
