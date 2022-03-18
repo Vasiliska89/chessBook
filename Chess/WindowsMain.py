@@ -1,5 +1,6 @@
 import pygame as p
-import sqlite3 as sq
+
+import DataBase
 from tkinter import *
 import ChessEngine
 WIDTH = 1024
@@ -94,18 +95,10 @@ def main():
                             frame = Frame()
                             frame.pack()
                             Button(frame, text="Comment",
-                                   command=lambda: makeComment(text, gs)).pack(side=LEFT)
+                                   command=lambda: DataBase.makeComment(text.get(1.0, END), getChar(gs.getFen()))).pack(side=LEFT)
                             root.mainloop()
                         if row==3: #show comment
-                            with sq.connect("chessNote.db") as con:  # this will be created if not exist
-                                cur = con.cursor()
-                                fen = getChar(gs.getFen())
-                                cur.execute("""CREATE TABLE IF NOT EXISTS notes (fen TEXT, comment TEXT NOT NULL DEFAULT 'No comment yet')""")
-                                cur.execute("""SELECT comment FROM notes WHERE fen=?""", (fen,))
-                                com = cur.fetchall()
-                                showComment(com[0][0] if len(com)>0 else "This position is not explored by you!")
-
-
+                            showComment(DataBase.getComment(getChar(gs.getFen())))
 
         if moveMade:
             if animate: animateMove(screen, gs.board, gs.moveLog[-1], clock)
@@ -201,17 +194,7 @@ def drawText(screen, text):
     textObject = font.render(text, 0, p.Color("Black"))
     textLocation = p.Rect(0, 0, WIDTH//2, HEIGHT).move(WIDTH//4-textObject.get_width()//2, HEIGHT//2-textObject.get_height()//2)
     screen.blit(textObject, textLocation)
-def makeComment(text, gs):
-    print(text.get(1.0, END))
-    with sq.connect("chessNote.db") as con:  # this will be created if not exist
-        cur = con.cursor()
-        fen = getChar(gs.getFen())
-        cur.execute("""CREATE TABLE IF NOT EXISTS notes (fen TEXT, comment TEXT NOT NULL DEFAULT 'No comment yet')""")
-        cur.execute("""SELECT comment FROM notes WHERE fen=?""", (fen,))
-        if len(cur.fetchall())==0:
-            cur.execute("""INSERT INTO notes VALUES(?, ?)""", (fen, text.get(1.0, END)))
-        else:
-            cur.execute("""UPDATE notes SET comment = ? WHERE fen = ?""", (text.get(1.0, END), fen))
+
 def showComment(txt):
     label = Label(None, text=txt, font=('Times', '18'))
     label.pack()
