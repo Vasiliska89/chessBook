@@ -10,7 +10,7 @@ DIMENSION = 8
 SQ_SIZE = HEIGHT // DIMENSION
 MAX_FPS = 15
 IMAGES = {}
-whiteSide = True
+
 
 '''
 figures images
@@ -24,6 +24,7 @@ def loadImages():
 
 
 def main():
+    whiteSide = True
     moveMade = False
     animate = False
     p.init()
@@ -52,7 +53,8 @@ def main():
             elif e.type == p.MOUSEBUTTONDOWN:
                 location = p.mouse.get_pos()
                 col = location[0] // SQ_SIZE
-                row = location[1] // SQ_SIZE
+                row = (location[1]  // SQ_SIZE) if whiteSide else 7 - (location[1] // SQ_SIZE)
+                print(row, col, location[1])
                 if not gameOver:
 
                     if col <= DIMENSION:
@@ -75,7 +77,8 @@ def main():
                             if not moveMade:
                                 playerClicks = [sqSelected]
                 # if button was pushed:
-                if col > DIMENSION and row < len(buttons):
+                if col > DIMENSION and ((row < len(buttons) and whiteSide) or (7 - row < len(buttons) and not whiteSide)):
+                    row = row if whiteSide else 7 - row
                     if row == 0:  # undo move
                         gs.undoMove()
                         moveMade = True
@@ -104,12 +107,18 @@ def main():
                     if row == 3:  # show comment
                         showComment(DataBase.getComment(getChar(gs.getFen())))
 
+                    if row == 4:
+                        if col == 9: #reverse board
+                            whiteSide = not whiteSide
+                            drawGameState(screen, gs, validMoves, sqSelected, buttons, whiteSide)
+
+
         if moveMade:
-            if animate: animateMove(screen, gs.board, gs.moveLog[-1], clock)
+            if animate: animateMove(screen, gs.board, gs.moveLog[-1], clock, whiteSide)
             validMoves = gs.getValidMoves()
             moveMade = False
             animate = False
-        drawGameState(screen, gs, validMoves, sqSelected, buttons)
+        drawGameState(screen, gs, validMoves, sqSelected, buttons, whiteSide)
 
         if gs.checkMate:
             gameOver = True
@@ -130,23 +139,24 @@ highliting moves
 '''
 
 
-def highlightSquares(screen, gs, validMoves, sqSelected):
+def highlightSquares(screen, gs, validMoves, sqSelected, whiteSide):
     if sqSelected != ():
-        r, c = sqSelected
-        if gs.board[r][c][0] == ('w' if gs.whiteToMove else 'b'):
+        r, c = sqSelected if whiteSide else (7-sqSelected[0], sqSelected[1])
+
+        if gs.board[sqSelected[0]][c][0] == ('w' if gs.whiteToMove else 'b'):
             s = p.Surface((SQ_SIZE, SQ_SIZE))
             s.set_alpha(100)  # transparency
             s.fill(p.Color('yellow'))
             screen.blit(s, (c * SQ_SIZE, r * SQ_SIZE))
             for move in validMoves:
-                if move.startRow == r and move.startCol == c:
-                    screen.blit(s, (move.endCol * SQ_SIZE, move.endRow * SQ_SIZE))
+                if move.startRow == sqSelected[0] and move.startCol == c:
+                    screen.blit(s, (move.endCol * SQ_SIZE, (move.endRow if whiteSide else 7-move.endRow) * SQ_SIZE))
 
 
-def drawGameState(screen, gs, validMoves, sqSelected, buttons):
+def drawGameState(screen, gs, validMoves, sqSelected, buttons, whiteSide):
     drawBoard(screen)
-    highlightSquares(screen, gs, validMoves, sqSelected)
-    drawPieces(screen, gs.board)
+    highlightSquares(screen, gs, validMoves, sqSelected, whiteSide)
+    drawPieces(screen, gs.board, whiteSide)
     drawButtons(screen, buttons)
 
 
@@ -164,18 +174,18 @@ move animation
 '''
 
 
-def animateMove(screen, board, move, clock):
+def animateMove(screen, board, move, clock, whiteSide):
     global colors
-    deltaRow = move.endRow - move.startRow
+    deltaRow = move.endRow - move.startRow if whiteSide else -(move.endRow - move.startRow)
     deltaCol = move.endCol - move.startCol
     framesPerSquare = 10
     frameCount = (abs(deltaCol) + abs(deltaRow)) * framesPerSquare
     for frame in range(frameCount + 1):
-        r, c = (move.startRow + deltaRow * (frame / frameCount), move.startCol + deltaCol * (frame / frameCount))
+        r, c = ((move.startRow if whiteSide else 7-move.startRow) + deltaRow * (frame / frameCount), move.startCol + deltaCol * (frame / frameCount))
         drawBoard(screen)
-        drawPieces(screen, board)
-        color = colors[(move.startRow + move.startCol) % 2]
-        endSquare = p.Rect(move.endCol * SQ_SIZE, move.endRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
+        drawPieces(screen, board, whiteSide)
+        color = colors[(move.startRow + move.startCol) % 2] if whiteSide else colors[((move.startRow + move.startCol)+1) % 2]
+        endSquare = p.Rect(move.endCol * SQ_SIZE, (move.endRow if whiteSide else 7-move.endRow) * SQ_SIZE, SQ_SIZE, SQ_SIZE)
         p.draw.rect(screen, color, endSquare)
         if move.pieceCaptured != "--":
             screen.blit(IMAGES[move.pieceCaptured], endSquare)
@@ -184,7 +194,7 @@ def animateMove(screen, board, move, clock):
         clock.tick(90)
 
 
-def drawPieces(screen, board):
+def drawPieces(screen, board, whiteSide):
     for r in range(DIMENSION):
         for c in range(DIMENSION):
             piece = board[r][c]
